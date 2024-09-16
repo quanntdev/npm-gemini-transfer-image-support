@@ -12,4 +12,4 @@ We are testing the Gemini API for analyzing data from websites, and this package
 2. **Install the package** using npm:
 
 ```bash
-npm install fake-name-email-generator
+npm gemini-transfer-image-support
