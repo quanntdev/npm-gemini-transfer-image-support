@@ -16,5 +16,5 @@ npm gemini-transfer-image-support
 ```
 
 ## 👨🏻‍💻 Information:
-- **Link Packages: ** [gemini-transfer-image-support](https://www.npmjs.com/package/gemini-transfer-image-support)
-- **Link URL: ** [gemini-transfer-image-support](https://github.com/quanntdev/npm-gemini-transfer-image-support)
+- Link Packages: [gemini-transfer-image-support](https://www.npmjs.com/package/gemini-transfer-image-support)
+- Link Github: [gemini-transfer-image-support](https://github.com/quanntdev/npm-gemini-transfer-image-support)
