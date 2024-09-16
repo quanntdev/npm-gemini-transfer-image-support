@@ -1,0 +1,22 @@
+{
+  "name": "gemini-transfer-image-support",
+  "version": "1.0.4",
+  "description": "A simple module to transfer image from gemini api.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": [
+    "gemini",
+    "image",
+    "ai",
+    "generator",
+    "testing"
+  ],
+  "author": "Qian",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.19.0",
+    "axios": "^1.7.7"
+  }
+}
