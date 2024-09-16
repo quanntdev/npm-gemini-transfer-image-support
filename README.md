@@ -13,3 +13,8 @@ We are testing the Gemini API for analyzing data from websites, and this package
 
 ```bash
 npm gemini-transfer-image-support
+```
+
+## 👨🏻‍💻 Information:
+- **Link Packages: ** [gemini-transfer-image-support](https://www.npmjs.com/package/gemini-transfer-image-support)
+- **Link URL: ** [gemini-transfer-image-support](https://github.com/quanntdev/npm-gemini-transfer-image-support)
