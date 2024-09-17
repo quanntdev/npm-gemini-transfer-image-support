@@ -4,6 +4,7 @@ const { GEMINI_CONFIG, LANGUAGE } = require("../constants/gemini");
 const { GoogleGenerativeAI, SchemaType } = require("@google/generative-ai");
 const { GoogleAIFileManager } = require("@google/generative-ai/server");
 const { transferTextToJson } = require("../helper/text-transfer");
+const fs = require("fs");
 
 class GeminiServices {
   constructor({apiKey, modal, lang}) {
@@ -11,15 +12,9 @@ class GeminiServices {
       throw new Error("API key is required");
     }
 
-    if(modal) {
-      this.geminiModal = modal
-    }
-    this.geminiModal = GEMINI_CONFIG.FLASH_MODEL_TYPE
+    this.geminiModal = modal ||  GEMINI_CONFIG.FLASH_MODEL_TYPE
 
-    if(lang) {
-      this.language = lang
-    }
-    this.language = LANGUAGE.EN
+    this.language = lang || LANGUAGE.EN
 
     this.axiosInstance = createAxiosInstance(apiKey);
     this.genAI = new GoogleGenerativeAI(apiKey);
@@ -64,14 +59,14 @@ class GeminiServices {
   }
 
 
-  async handleGenerateContentFromImage(filePath, numberRecords = 1) {
+  async handleGenerateContentFromImageCloud({filePath, numberRecords = 1, customTextCapture, feeling = []}) {
     try {
       const uploadResponse = await this.#handleUploadGeminiFile(filePath)
 
       const modelType = this.geminiModal
 
       const schema = {
-        description: "List of photo information ",
+        description: `List of photo information`,
         type: SchemaType.ARRAY,
         items: {
           type: SchemaType.OBJECT,
@@ -88,7 +83,7 @@ class GeminiServices {
             },
             capture: {
               type: SchemaType.STRING,
-              description: `Capture of the photo, it should be the trendy sayings of the youth, can use icon`,
+              description: `Capture of the photo, it should be a little long, can use icon`,
               nullable: false,
             }
           },
@@ -104,7 +99,13 @@ class GeminiServices {
         },
       });
 
-      const prompt = `Give ${numberRecords} data records of the image, ${this.language} return data`;
+      const prompt = 
+      `Give ${numberRecords} data records of the image
+       Note:
+        - Data must be translated into ${this.language}
+        - ${customTextCapture}
+        - ${feeling.length > 0 ? `Feeling: ${feeling.join(", ")}` : ""}
+      `;
 
       const result = await model.generateContent([
         {
@@ -122,6 +123,32 @@ class GeminiServices {
     } catch(e) {
       throw new Error(`Failed to call API: ${e.message}`);
     }
+  }
+
+  async fileToGenerativePart(path, mimeType) {
+    return {
+      inlineData: {
+        data: Buffer.from(fs.readFileSync(path)).toString("base64"),
+        mimeType
+      },
+    };
+  }
+
+  async handleGenerateContentFromImageLocal() {
+  // Waiting to update
+  //   const filePart1 = await this.fileToGenerativePart("sukhoi.jpg", "image/jpeg")
+  //   const filePart2 = await this.fileToGenerativePart("f35.jpg", "image/jpeg")
+  //   const model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  //   const prompt = "give different comparison data between photos";
+
+
+  // const imageParts = [
+  //   filePart1,
+  //   filePart2,
+  // ];
+
+  // const generatedContent = await model.generateContent([prompt, ...imageParts]);
+  // console.log(generatedContent.response.text());
   }
 }
 
