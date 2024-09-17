@@ -1,7 +1,7 @@
 const GeminiClient = require('../services/gemini')
 
 const geminiClient = new GeminiClient({
-    apiKey: "AIzaSyA5_fUlDsITvzXQbl8iMHIWaZqatcZeI5c",
+    apiKey: "apikey",
     lang: "Vietnamese"
 })
 
