@@ -3,18 +3,18 @@ const createAxiosInstance = require("../config/gemini");
 const { GEMINI_CONFIG, LANGUAGE } = require("../constants/gemini");
 const { GoogleGenerativeAI, SchemaType } = require("@google/generative-ai");
 const { GoogleAIFileManager } = require("@google/generative-ai/server");
-const { transferTextToJson } = require("../helper/text-transfer");
 const fs = require("fs");
+const { handleGenderSchemaRenderImage } = require("../prompt/gemini");
 
 class GeminiServices {
-  constructor({apiKey, modal, lang}) {
+  constructor({ apiKey, modal, lang }) {
     if (!apiKey) {
       throw new Error("API key is required");
     }
 
-    this.geminiModal = modal ||  GEMINI_CONFIG.FLASH_MODEL_TYPE
+    this.geminiModal = modal || GEMINI_CONFIG.FLASH_MODEL_TYPE;
 
-    this.language = lang || LANGUAGE.EN
+    this.language = lang || LANGUAGE.EN;
 
     this.axiosInstance = createAxiosInstance(apiKey);
     this.genAI = new GoogleGenerativeAI(apiKey);
@@ -55,15 +55,19 @@ class GeminiServices {
       displayName: "uploadImage",
     });
 
-    return uploadResponse
+    return uploadResponse;
   }
 
-
-  async handleGenerateContentFromImageCloud({filePath, numberRecords = 1, customTextCapture, feeling = []}) {
+  async handleGenerateContentFromImageCloud({
+    filePath,
+    numberRecords = 1,
+    customTextCapture,
+    feeling = [],
+  }) {
     try {
-      const uploadResponse = await this.#handleUploadGeminiFile(filePath)
+      const uploadResponse = await this.#handleUploadGeminiFile(filePath);
 
-      const modelType = this.geminiModal
+      const modelType = this.geminiModal;
 
       const schema = {
         description: `List of photo information`,
@@ -73,7 +77,8 @@ class GeminiServices {
           properties: {
             location: {
               type: SchemaType.STRING,
-              description: "Location in photo ( specifically in which city or country, if not a landscape photo then describe where it is )",
+              description:
+                "Location in photo ( specifically in which city or country, if not a landscape photo then describe where it is )",
               nullable: false,
             },
             description: {
@@ -85,7 +90,7 @@ class GeminiServices {
               type: SchemaType.STRING,
               description: `Capture of the photo, it should be a little long, can use icon`,
               nullable: false,
-            }
+            },
           },
           required: ["location", "description", "capture"],
         },
@@ -99,8 +104,7 @@ class GeminiServices {
         },
       });
 
-      const prompt = 
-      `Give ${numberRecords} data records of the image
+      const prompt = `Give ${numberRecords} data records of the image
        Note:
         - Data must be translated into ${this.language}
         - ${customTextCapture}
@@ -119,8 +123,8 @@ class GeminiServices {
         },
       ]);
 
-      return JSON.parse(result.response.text())
-    } catch(e) {
+      return JSON.parse(result.response.text());
+    } catch (e) {
       throw new Error(`Failed to call API: ${e.message}`);
     }
   }
@@ -129,26 +133,42 @@ class GeminiServices {
     return {
       inlineData: {
         data: Buffer.from(fs.readFileSync(path)).toString("base64"),
-        mimeType
+        mimeType,
       },
     };
   }
 
-  async handleGenerateContentFromImageLocal() {
-  // Waiting to update
-  //   const filePart1 = await this.fileToGenerativePart("sukhoi.jpg", "image/jpeg")
-  //   const filePart2 = await this.fileToGenerativePart("f35.jpg", "image/jpeg")
-  //   const model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-  //   const prompt = "give different comparison data between photos";
+  async handleGenerateContentFromImageLocal({imageFiles = [],  numberRecords = 1,}) {
+    const maxFiles = Math.min(imageFiles.length, 20);
 
+    const imageParts = await Promise.all(
+      imageFiles
+        .slice(0, maxFiles)
+        .map((file) => this.fileToGenerativePart(file, "image/jpeg"))
+    );
 
-  // const imageParts = [
-  //   filePart1,
-  //   filePart2,
-  // ];
+    const modelType = this.geminiModal;
+    const schema = handleGenderSchemaRenderImage()
 
-  // const generatedContent = await model.generateContent([prompt, ...imageParts]);
-  // console.log(generatedContent.response.text());
+    const model = this.genAI.getGenerativeModel({
+      model: modelType,
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: schema,
+      },
+    });
+
+    const prompt = `Give ${numberRecords} data records of images
+    Note:
+     - Data must be translated into ${this.language}
+   `;
+
+    const generatedContent = await model.generateContent([
+      prompt,
+      ...imageParts,
+    ]);
+
+   return JSON.parse(generatedContent.response.text());
   }
 }
 
