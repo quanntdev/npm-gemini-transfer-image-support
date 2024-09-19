@@ -1,6 +1,6 @@
 {
   "name": "gemini-transfer-image-support",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A simple module to transfer image from gemini api.",
   "main": "index.js",
   "scripts": {
