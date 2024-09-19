@@ -31,6 +31,32 @@ const handleGenderSchemaRenderImage = () => {
   return schema;
 };
 
+const handleGenderSchemaReadImage = () => {
+  const schema = {
+    description: `The information shown in the photo`,
+    type: SchemaType.ARRAY,
+    items: {
+      type: SchemaType.OBJECT,
+      properties: {
+        value: {
+          type: SchemaType.STRING,
+          description: "The text information contained in the photo",
+          nullable: false,
+        },
+        label: {
+          type: SchemaType.STRING,
+          description: "The label describing the value, you define these fields yourself",
+          nullable: false,
+        },
+      },
+      required: ["value", "label"],
+    },
+  };
+
+  return schema;
+};
+
 module.exports = {
-    handleGenderSchemaRenderImage
+    handleGenderSchemaRenderImage,
+    handleGenderSchemaReadImage
 };

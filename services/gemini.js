@@ -4,7 +4,10 @@ const { GEMINI_CONFIG, LANGUAGE } = require("../constants/gemini");
 const { GoogleGenerativeAI, SchemaType } = require("@google/generative-ai");
 const { GoogleAIFileManager } = require("@google/generative-ai/server");
 const fs = require("fs");
-const { handleGenderSchemaRenderImage } = require("../prompt/gemini");
+const {
+  handleGenderSchemaRenderImage,
+  handleGenderSchemaReadImage,
+} = require("../prompt/gemini");
 
 class GeminiServices {
   constructor({ apiKey, modal, lang }) {
@@ -138,7 +141,10 @@ class GeminiServices {
     };
   }
 
-  async handleGenerateContentFromImageLocal({imageFiles = [],  numberRecords = 1,}) {
+  async handleGenerateContentFromImageLocal({
+    imageFiles = [],
+    numberRecords = 1,
+  }) {
     const maxFiles = Math.min(imageFiles.length, 20);
 
     const imageParts = await Promise.all(
@@ -148,7 +154,7 @@ class GeminiServices {
     );
 
     const modelType = this.geminiModal;
-    const schema = handleGenderSchemaRenderImage()
+    const schema = handleGenderSchemaRenderImage();
 
     const model = this.genAI.getGenerativeModel({
       model: modelType,
@@ -168,7 +174,40 @@ class GeminiServices {
       ...imageParts,
     ]);
 
-   return JSON.parse(generatedContent.response.text());
+    return JSON.parse(generatedContent.response.text());
+  }
+
+  // importantContentView :  is the part that the user wants to extract the most, prioritize searching for it
+  // customLabelImportant : is the label that the user wants to use to describe the importantContentView in the image
+  async readContentFromImage({ imagePart, importantContentView = "", customLabelImportant = "" }) {
+    const imageData = await this.fileToGenerativePart(imagePart, "image/jpeg");
+
+    const modelType = this.geminiModal;
+    const schema = handleGenderSchemaReadImage();
+
+    const model = this.genAI.getGenerativeModel({
+      model: modelType,
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: schema,
+      },
+    });
+
+    const prompt = `Provide me with data as pairs of values that appear in the photo
+    Note:
+     - The data is an array that can have multiple items
+     - label : Labels are data fields that you define yourself, labels must translate to ${this.language}
+     - Value : Values are the data you collect from the image
+     - Only print out the data present in the image, do not add anything that is not there
+     - ${importantContentView}
+     - ${importantContentView ? `${importantContentView}, the label of that item is ${customLabelImportant}` : ""}
+   `;
+    const generatedContent = await model.generateContent([
+      prompt,
+      imageData,
+    ]);
+
+    return JSON.parse(generatedContent.response.text());
   }
 }
 
