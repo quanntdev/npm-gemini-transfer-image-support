@@ -7,6 +7,7 @@ const fs = require("fs");
 const {
   handleGenderSchemaRenderImage,
   handleGenderSchemaReadImage,
+  handleRenderManyDataFromImage,
 } = require("../prompt/gemini");
 
 class GeminiServices {
@@ -179,7 +180,11 @@ class GeminiServices {
 
   // importantContentView :  is the part that the user wants to extract the most, prioritize searching for it
   // customLabelImportant : is the label that the user wants to use to describe the importantContentView in the image
-  async readContentFromImage({ imagePart, importantContentView = "", customLabelImportant = "" }) {
+  async readContentFromImage({
+    imagePart,
+    importantContentView = "",
+    customLabelImportant = "",
+  }) {
     const imageData = await this.fileToGenerativePart(imagePart, "image/jpeg");
 
     const modelType = this.geminiModal;
@@ -196,16 +201,49 @@ class GeminiServices {
     const prompt = `Provide me with data as pairs of values that appear in the photo
     Note:
      - The data is an array that can have multiple items
-     - label : Labels are data fields that you define yourself, labels must translate to ${this.language}
+     - label : Labels are data fields that you define yourself, labels must translate to ${
+       this.language
+     }
      - Value : Values are the data you collect from the image
      - Only print out the data present in the image, do not add anything that is not there
      - ${importantContentView}
-     - ${importantContentView ? `${importantContentView}, the label of that item is ${customLabelImportant}` : ""}
+     - ${
+       importantContentView
+         ? `${importantContentView}, the label of that item is ${customLabelImportant}`
+         : ""
+     }
    `;
-    const generatedContent = await model.generateContent([
-      prompt,
-      imageData,
-    ]);
+    const generatedContent = await model.generateContent([prompt, imageData]);
+
+    return JSON.parse(generatedContent.response.text());
+  }
+
+  async readManyDataFromImage({ imagePart, customField = [], note = "" }) {
+    const imageData = await this.fileToGenerativePart(imagePart, "image/jpeg");
+
+    const modelType = this.geminiModal;
+    const schema = handleRenderManyDataFromImage(customField);
+
+    const model = this.genAI.getGenerativeModel({
+      model: modelType,
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: schema,
+      },
+    });
+
+    const prompt = `
+        Please analyze the image and return an array of items.
+        Each item should consist of machine-recognized field names (fields that you determine) and their corresponding analyzed values. 
+
+        Note
+          - The amount of data in the data variable should be the same.
+          - Only filter meaningful information.
+          - ${note}
+        Return the data as an array of objects, where each object contains multiple field-value pairs.
+        Ensure that each object in the array contains the recognized field names and their associated values, and each field has an appropriate value analyzed from the image.
+    `;
+    const generatedContent = await model.generateContent([prompt, imageData]);
 
     return JSON.parse(generatedContent.response.text());
   }

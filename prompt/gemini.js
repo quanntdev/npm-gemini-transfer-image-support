@@ -56,7 +56,40 @@ const handleGenderSchemaReadImage = () => {
   return schema;
 };
 
+const handleRenderManyDataFromImage = (customField) => {
+    const schema = {
+    description: `An array of objects representing various fields and their analyzed values`,
+    type: SchemaType.ARRAY,
+    items: {
+      type: SchemaType.OBJECT,
+      properties: {
+        index: {
+          type: SchemaType.STRING,
+          description: "The order number of items, ascending",
+          nullable: false,
+        },
+        items: {
+          type: SchemaType.OBJECT,
+          properties: {
+            ...customField?.reduce((acc, item) => {
+              acc[item.label] = {
+                type: SchemaType.STRING,
+                description: item.description,
+                nullable: false,
+              };
+              return acc;
+            }, {}),
+          },
+        }
+      },
+    },
+  };
+
+  return schema;
+}
+
 module.exports = {
     handleGenderSchemaRenderImage,
-    handleGenderSchemaReadImage
+    handleGenderSchemaReadImage,
+    handleRenderManyDataFromImage
 };
