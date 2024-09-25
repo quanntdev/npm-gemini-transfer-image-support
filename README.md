@@ -15,6 +15,10 @@ We are testing the Gemini API for analyzing data from websites, and this package
 npm gemini-transfer-image-support
 ```
 
+## 👨🏻‍💻 Information:
+- Link Packages: [gemini-transfer-image-support](https://www.npmjs.com/package/gemini-transfer-image-support)
+- Link Github: [gemini-transfer-image-support](https://github.com/quanntdev/npm-gemini-transfer-image-support)
+
 ## 📚 Usage:
 ### Example of `readManyDataFromImage` function:
 ```javascript
@@ -52,7 +56,3 @@ const handleGetData = async () => {
 
 handleGetData()
 ```
-
-## 👨🏻‍💻 Information:
-- Link Packages: [gemini-transfer-image-support](https://www.npmjs.com/package/gemini-transfer-image-support)
-- Link Github: [gemini-transfer-image-support](https://github.com/quanntdev/npm-gemini-transfer-image-support)
