@@ -21,8 +21,9 @@ npm gemini-transfer-image-support
 
 ## 📚 Usage:
 ### Example of `readManyDataFromImage` function:
-description: The function is used to analyze data into multiple image elements.
+Description: The function is used to analyze data into multiple image elements.
 
+Overall Description: The code is responsible for extracting structured data (product name, price, and sale information) from an image (data.png) using the Gemini API. It captures and logs the API response, providing insight into the specified data elements present in the image.
 ```javascript
 const GeminiClient = require('../services/gemini')
 
@@ -60,7 +61,9 @@ handleGetData()
 ```
 
 ### Example of `handleGenerateContentFromImageLocal` function:
-description: The function is used to analyze data into multiple image elements.
+Description: The function is used to analyze data into multiple image elements.
+
+Overall Description: The function is used to analyze data from multiple images (place1.png, place2.png, place3.png) using the Gemini API. It processes these images and retrieves up to 4 records of data, which it then logs or handles accordingly.
 
 ```javascript
 const GeminiClient = require('../services/gemini')
